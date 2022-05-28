@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:azkar1/models/category_model.dart';
 import 'package:azkar1/screens/section_details_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -9,16 +12,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<CategoryModel> categories = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadSections();
+  }
 
   IconData showIcon = Icons.list;
   String showStatus = "list";
   String screenName = "أذكار المسلم";
+
   // Icon showIcon1 = Icon(showIcon
   //   // Icons.apps_sharp,
   // );
   @override
   Widget build(BuildContext context) {
-
     // Icon showIcon1 = Icon(showIcon
     //   // Icons.apps_sharp,
     // );
@@ -26,16 +37,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon:
-          // showIcon1,
-          Icon(showIcon),
+              // showIcon1,
+              Icon(showIcon),
           onPressed: () {
             setState(() {
-              if(showStatus == "list")
-              {
+              if (showStatus == "list") {
                 showIcon = Icons.apps_sharp;
                 showStatus = "grid";
-              }
-              else{
+              } else {
                 showIcon = Icons.list;
                 showStatus = "list";
               }
@@ -44,47 +53,39 @@ class _HomeScreenState extends State<HomeScreen> {
             // print(showIcon1);
           },
         ),
-        title:  Text('$screenName'),
+        title: Text('$screenName'),
       ),
       body: Padding(
         padding: EdgeInsets.all(10.0),
-        child: showStatus =='list'? ListView(physics: BouncingScrollPhysics(), children: [
-          buildCategory(title: 'azkar 1'),
-          buildCategory(title: 'azkar 2'),
-          buildCategory(title: 'azkar 3'),
-          buildCategory(title: 'azkar 4'),
-          buildCategory(title: 'azkar 5'),
-          buildCategory(title: 'azkar 6'),
-          buildCategory(title: 'azkar 7'),
-          buildCategory(title: 'azkar 8'),
-          buildCategory(title: 'azkar 9'),
-          buildCategory(title: 'azkar 10'),
-        ]):GridView(
-          physics: BouncingScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,crossAxisSpacing: 10.0),
-          children: <Widget>[
-            buildCategory(title: 'azkar 1'),
-            buildCategory(title: 'azkar 2'),
-            buildCategory(title: 'azkar 3'),
-            buildCategory(title: 'azkar 4'),
-            buildCategory(title: 'azkar 5'),
-            buildCategory(title: 'azkar 6'),
-            buildCategory(title: 'azkar 7'),
-            buildCategory(title: 'azkar 8'),
-            buildCategory(title: 'azkar 9'),
-            buildCategory(title: 'azkar 10'),
-          ],
-        ),
+        child: showStatus == 'list'
+            ? ListView.builder(
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) => buildCategory(
+                  model: categories[index],
+                ),
+                itemCount: categories.length,
+              )
+            : GridView.builder(
+                physics: BouncingScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.0,
+                ),
+                itemBuilder: (context, index) => buildCategory(
+                  model: categories[index],
+                ),
+                itemCount: categories.length,
+              ),
       ),
     );
   }
 
-  Widget buildCategory({required String title}) {
+  Widget buildCategory({required CategoryModel model}) {
     return InkWell(
       onTap: () {
         // Navigator.of(context).push(route)
         Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => SectionDetailScreen()));
+            MaterialPageRoute(builder: (context) => SectionDetailScreen(model: model,)));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -102,10 +103,9 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: EdgeInsets.only(top: 12.0),
         padding: EdgeInsets.all(20.0),
         // height: 100,
-        child:
-        Center(
+        child: Center(
           child: Text(
-            title,
+            model.name!,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -117,4 +117,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  /************ st load data from json *********/
+  loadSections() async {
+    DefaultAssetBundle.of(context)
+        .loadString("assets/database_json/categories_db.json")
+        .then((data) {
+      var response = json.decode(data);
+      response.forEach((section) {
+        CategoryModel _section = CategoryModel.fromJson(section);
+        categories.add(_section);
+      });
+      setState(() {});
+    }).catchError((error) {
+      print(error);
+    });
+  }
+/************ nd load data from json *********/
+
 }
