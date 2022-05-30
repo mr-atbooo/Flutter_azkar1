@@ -13,6 +13,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<CategoryModel> categories = [];
+  Color myColor = Color(0xff00bfa5);
+  Color mainColor = Color(0xff4c8597);
+  final myController = TextEditingController();
 
   @override
   void initState() {
@@ -30,11 +33,38 @@ class _HomeScreenState extends State<HomeScreen> {
   // );
   @override
   Widget build(BuildContext context) {
-    // Icon showIcon1 = Icon(showIcon
-    //   // Icons.apps_sharp,
-    // );
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            // onPressed: () {
+            //   setState(() {
+            //     print('add');
+            //     // categories.add(CategoryModel(categories.length, 'ss'));
+            //     // print(categories);
+            //     // showDialog(
+            //     //     context: context,
+            //     //     builder: (_) => AlertDialog(
+            //     //       title: Text('Dialog Title'),
+            //     //       content: Text('This is my content'),
+            //     //     )
+            //     // );
+            //     // Future.delayed(Duration.zero, () => showAddModal(context));
+            //     // showAddModal(context);
+            //   });
+            // },
+            onPressed: openAlertBox,
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              setState(() {
+                categories.clear();
+              });
+            },
+          ),
+        ],
         leading: IconButton(
           icon:
               // showIcon1,
@@ -60,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: showStatus == 'list'
             ? ListView.builder(
                 physics: BouncingScrollPhysics(),
-                itemBuilder: (context, index) => buildCategory(
+                itemBuilder: (context, index) => buildAnimatedCategory(
                   model: categories[index],
                 ),
                 itemCount: categories.length,
@@ -84,8 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () {
         // Navigator.of(context).push(route)
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => SectionDetailScreen(model: model,)));
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SectionDetailScreen(
+                  model: model,
+                )));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -96,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               colors: [
                 Color(0xff5db7d4),
                 // Color(0xFF36545e),
-                Color(0xff4c8597)
+                mainColor
               ]),
         ),
         width: double.infinity,
@@ -118,6 +150,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget buildAnimatedCategory({required CategoryModel model}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xff5db7d4),
+              // Color(0xFF36545e),
+              mainColor
+            ]),
+      ),
+      width: double.infinity,
+      margin: EdgeInsets.only(top: 12.0),
+      padding: EdgeInsets.all(20.0),
+      // height: 100,
+      child: ListTile(
+        title: Text(
+          model.name!,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Cairo',
+            fontSize: 20.0,
+          ),
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              categories.remove(model);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   /************ st load data from json *********/
   loadSections() async {
     DefaultAssetBundle.of(context)
@@ -133,6 +204,140 @@ class _HomeScreenState extends State<HomeScreen> {
       print(error);
     });
   }
-/************ nd load data from json *********/
+
+  /************ nd load data from json *********/
+
+  // void showAddModal(BuildContext context) {
+  //   showDialog(
+  //       useSafeArea: false,
+  //       context: context,
+  //       builder: (context) => AlertDialog(
+  //             contentPadding: const EdgeInsets.all(0),
+  //
+  //             // title: Text('Dialog Title'),
+  //             content: Container(
+  //               decoration: BoxDecoration(
+  //                 borderRadius: BorderRadius.circular(20.0),
+  //                 color: Colors.green,
+  //               ),
+  //               width: MediaQuery.of(context).size.width,
+  //               height: 300,
+  //             ),
+  //           ));
+  // }
+
+  /************* st modal for add element *******************/
+  openAlertBox() {
+    double borderRadius = 15.0;
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(borderRadius),
+              ),
+            ),
+            // contentPadding: EdgeInsets.only(top: 10.0),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              // width: 300.0,
+              // height: MediaQuery.of(context).size.height / 2,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    // color: mainColor,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      // borderRadius: BorderRadius.circular(borderRadius),
+                      borderRadius: new BorderRadius.only(
+                        topLeft: const Radius.circular(15.0),
+                        topRight: const Radius.circular(15.0),
+                      ),
+                      color: mainColor,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      // mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          "إضافة ذكر / دعاء",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.right,
+                          textDirection: TextDirection.rtl,
+                        ),
+                        SizedBox(width: 15),
+                        Container(
+                          decoration: BoxDecoration(
+                            // color: Colors.orange,
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: mainColor,
+                            size: 25.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 30.0, right: 30.0),
+                    child: TextField(
+                      controller: myController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      decoration: InputDecoration(
+                        hintText: "أكتب النص هنا",
+                        border: InputBorder.none,
+                      ),
+                      maxLines: 8,
+                    ),
+                  ),
+                  // SizedBox(
+                  //   height: 30.0,
+                  // ),
+                  InkWell(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
+                      decoration: BoxDecoration(
+                        color: mainColor,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(borderRadius),
+                            bottomRight: Radius.circular(borderRadius)),
+                      ),
+                      child: Text(
+                        "أضف ذكر",
+                        style: TextStyle(color: Colors.white,fontSize: 20.0),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    onTap: (){
+                      // print(111);
+                      categories.add(CategoryModel(categories.length, myController.text));
+                      setState(() {});
+                      Navigator.pop(context, false); // passing false
+                      myController.clear();
+                      // _controller.clear();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+/************* nd modal for add element *******************/
 
 }
