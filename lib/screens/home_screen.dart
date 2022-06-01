@@ -185,6 +185,17 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.edit, color: Colors.white),
+          // onPressed: () {
+          //   setState(() {
+          //     categories.remove(model);
+          //   });
+          // },
+          onPressed: (){
+            openEditModal(model);
+          },
+        ),
       ),
     );
   }
@@ -338,6 +349,122 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         });
   }
-/************* nd modal for add element *******************/
+  /************* nd modal for add element *******************/
+ /************* st modal for add element *******************/
+  openEditModal(CategoryModel myModal) {
+    double borderRadius = 15.0;
+    TextEditingController editText = TextEditingController();
+    editText.text = myModal.name!;
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(borderRadius),
+              ),
+            ),
+            // contentPadding: EdgeInsets.only(top: 10.0),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              // width: 300.0,
+              // height: MediaQuery.of(context).size.height / 2,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    // color: mainColor,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      // borderRadius: BorderRadius.circular(borderRadius),
+                      borderRadius: new BorderRadius.only(
+                        topLeft: const Radius.circular(15.0),
+                        topRight: const Radius.circular(15.0),
+                      ),
+                      color: mainColor,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      // mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text("تعديل ذكر / دعاء",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.right,
+                          textDirection: TextDirection.rtl,
+                        ),
+                        SizedBox(width: 15),
+                        Container(
+                          decoration: BoxDecoration(
+                            // color: Colors.orange,
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: mainColor,
+                            size: 25.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 30.0, right: 30.0),
+                    child: TextField(
+                      controller: editText,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      decoration: InputDecoration(
+                        hintText: "أكتب النص هنا",
+                        border: InputBorder.none,
+                      ),
+                      maxLines: 8,
+                    ),
+                  ),
+                  // SizedBox(
+                  //   height: 30.0,
+                  // ),
+                  InkWell(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
+                      decoration: BoxDecoration(
+                        color: mainColor,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(borderRadius),
+                            bottomRight: Radius.circular(borderRadius)),
+                      ),
+                      child: Text(
+                        "أضف ذكر",
+                        style: TextStyle(color: Colors.white,fontSize: 20.0),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    onTap: (){
+                      // print(111);
+                      final category = categories.firstWhere((item) => item.id == myModal.id);
+                      setState(() => category.name = editText.text);
+                      // categories.add(CategoryModel(categories.length, editText.text));
+                      setState(() {});
+                      Navigator.pop(context, false); // passing false
+                      myController.clear();
+                      // _controller.clear();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+  /************* nd modal for add element *******************/
 
 }
