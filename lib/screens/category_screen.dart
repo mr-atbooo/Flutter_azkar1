@@ -2,16 +2,18 @@ import 'dart:convert';
 
 import 'package:azkar1/models/category_model.dart';
 import 'package:azkar1/screens/section_details_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class CategoryScreen extends StatefulWidget {
+  const CategoryScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<CategoryScreen> createState() => _CategoryScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _CategoryScreenState extends State<CategoryScreen> {
   List<CategoryModel> categories = [];
   Color myColor = Color(0xff00bfa5);
   Color mainColor = Color(0xff4c8597);
@@ -27,6 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
   IconData showIcon = Icons.list;
   String showStatus = "list";
   String screenName = "أذكار المسلم";
+  bool statusBar = false;
+  String statusBarText = '';
+  String statusBarType = '';
+  int saveHeight = 120;
 
   // Icon showIcon1 = Icon(showIcon
   //   // Icons.apps_sharp,
@@ -34,33 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
-            // onPressed: () {
-            //   setState(() {
-            //     print('add');
-            //     // categories.add(CategoryModel(categories.length, 'ss'));
-            //     // print(categories);
-            //     // showDialog(
-            //     //     context: context,
-            //     //     builder: (_) => AlertDialog(
-            //     //       title: Text('Dialog Title'),
-            //     //       content: Text('This is my content'),
-            //     //     )
-            //     // );
-            //     // Future.delayed(Duration.zero, () => showAddModal(context));
-            //     // showAddModal(context);
-            //   });
-            // },
-            onPressed: openAlertBox,
-          ),
-          IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.more_vert),
             onPressed: () {
               setState(() {
-                categories.clear();
+                // categories.clear();
+                openSittingBox();
               });
             },
           ),
@@ -79,34 +68,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 showStatus = "list";
               }
             });
-            print(screenName);
+            print(showStatus);
             // print(showIcon1);
           },
         ),
         title: Text('$screenName'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: showStatus == 'list'
-            ? ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (context, index) => buildAnimatedCategory(
-                  model: categories[index],
+      body: Column(children: [
+        statusBar
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    statusBar = false;
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  child: Text(
+                    '${statusBarText}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.black, fontSize: 16),
+                  ),
+                  color: Colors.grey,
+                  width: double.infinity,
                 ),
-                itemCount: categories.length,
               )
-            : GridView.builder(
-                physics: BouncingScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10.0,
+            : SizedBox(),
+        Padding(
+          padding: EdgeInsets.all(10.0),
+          child: showStatus == 'list'
+              ? Container(
+                  height: statusBar
+                      ? MediaQuery.of(context).size.height - 200
+                      : MediaQuery.of(context).size.height - saveHeight,
+                  child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (context, index) => buildListCategory(
+                      model: categories[index],
+                    ),
+                    itemCount: categories.length,
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.height - saveHeight,
+                  child: GridView.builder(
+                    physics: BouncingScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10.0,
+                    ),
+                    itemBuilder: (context, index) => buildCategory(
+                      model: categories[index],
+                    ),
+                    itemCount: categories.length,
+                  ),
                 ),
-                itemBuilder: (context, index) => buildCategory(
-                  model: categories[index],
-                ),
-                itemCount: categories.length,
-              ),
-      ),
+        ),
+      ]),
     );
   }
 
@@ -150,51 +168,52 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildAnimatedCategory({required CategoryModel model}) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.0),
-        gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xff5db7d4),
-              // Color(0xFF36545e),
-              mainColor
-            ]),
-      ),
-      width: double.infinity,
-      margin: EdgeInsets.only(top: 12.0),
-      padding: EdgeInsets.all(20.0),
-      // height: 100,
-      child: ListTile(
-        title: Text(
-          model.name!,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: 'Cairo',
-            fontSize: 20.0,
-          ),
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.white),
-          onPressed: () {
+  Widget buildListCategory({required CategoryModel model}) {
+    return InkWell(
+      onTap: () {
+        // Navigator.of(context).push(route)
+        if (statusBar) {
+          if (statusBarType == "edit") {
+            openEditModal(model);
+          } else {
+            print('delete modal');
             setState(() {
               categories.remove(model);
             });
-          },
+          }
+        } else {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => SectionDetailScreen(
+                    model: model,
+                  )));
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.0),
+          gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xff5db7d4),
+                // Color(0xFF36545e),
+                mainColor
+              ]),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.edit, color: Colors.white),
-          // onPressed: () {
-          //   setState(() {
-          //     categories.remove(model);
-          //   });
-          // },
-          onPressed: (){
-            openEditModal(model);
-          },
+        width: double.infinity,
+        margin: EdgeInsets.only(top: 12.0),
+        padding: EdgeInsets.all(20.0),
+        // height: 100,
+        child: Center(
+          child: Text(
+            model.name!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Cairo',
+              fontSize: 20.0,
+            ),
+          ),
         ),
       ),
     );
@@ -237,8 +256,76 @@ class _HomeScreenState extends State<HomeScreen> {
   //           ));
   // }
 
+  /************* st modal for Sitting *******************/
+  openSittingBox() {
+    double borderRadius = 15.0;
+    statusBar = false;
+    statusBarType = '';
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(borderRadius),
+              ),
+            ),
+            // contentPadding: EdgeInsets.only(top: 10.0),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              // width: 300.0,
+              // height: MediaQuery.of(context).size.height / 2,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  sittingIcon(
+                      title: 'أضافة ذكر',
+                      itemIcon: Icons.add,
+                      myFunc: () {
+                        print('add');
+                        Navigator.pop(context, false);
+                        addModal();
+                      }),
+                  sittingIcon(
+                      title: 'تعديل ذكر',
+                      itemIcon: Icons.edit,
+                      myFunc: () {
+                        print('edit');
+                        setState(() {
+                          statusBar = !statusBar;
+                          statusBarType = "edit";
+                          statusBarText = "أضغط على الذكر لتعديله أو الضغط هنا للألغاء";
+                          Navigator.pop(context, false);
+                        });
+                      }),
+                  sittingIcon(
+                      title: 'حذف ذكر',
+                      itemIcon: Icons.delete,
+                      myFunc: () {
+                        print('delete');
+                        setState(() {
+                          // if(statusBar == false){
+                          statusBar = !statusBar;
+                          // }else{}
+
+                          statusBarType = "delete";
+                          statusBarText = "أضغط على الذكر لحذفه أو الضغط هنا للألغاء";
+                        });
+                        Navigator.pop(context, false);
+                      }),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  /************* nd modal for Sitting *******************/
   /************* st modal for add element *******************/
-  openAlertBox() {
+  addModal() {
     double borderRadius = 15.0;
     return showDialog(
         context: context,
@@ -330,16 +417,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Text(
                         "أضف ذكر",
-                        style: TextStyle(color: Colors.white,fontSize: 20.0),
+                        style: TextStyle(color: Colors.white, fontSize: 20.0),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    onTap: (){
+                    onTap: () {
                       // print(111);
-                      categories.add(CategoryModel(categories.length, myController.text));
+                      categories.add(
+                          CategoryModel(categories.length, myController.text));
                       setState(() {});
                       Navigator.pop(context, false); // passing false
                       myController.clear();
+                      Fluttertoast.showToast(
+                          msg: "تمت العمليه بنجاح",
+                          // toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 3,
+                          backgroundColor: Colors.black,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
                       // _controller.clear();
                     },
                   ),
@@ -349,8 +445,9 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         });
   }
+
   /************* nd modal for add element *******************/
- /************* st modal for edit element *******************/
+  /************* st modal for edit element *******************/
   openEditModal(CategoryModel myModal) {
     double borderRadius = 15.0;
     TextEditingController editText = TextEditingController();
@@ -390,7 +487,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       // mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Text("تعديل ذكر / دعاء",
+                        Text(
+                          "تعديل ذكر / دعاء",
                           style: TextStyle(
                             fontSize: 20.0,
                             color: Colors.white,
@@ -444,18 +542,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Text(
                         "تعديل ذكر",
-                        style: TextStyle(color: Colors.white,fontSize: 20.0),
+                        style: TextStyle(color: Colors.white, fontSize: 20.0),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    onTap: (){
+                    onTap: () {
                       // print(111);
-                      final category = categories.firstWhere((item) => item.id == myModal.id);
+                      final category = categories
+                          .firstWhere((item) => item.id == myModal.id);
                       setState(() => category.name = editText.text);
                       // categories.add(CategoryModel(categories.length, editText.text));
                       setState(() {});
                       Navigator.pop(context, false); // passing false
                       myController.clear();
+                      Fluttertoast.showToast(
+                          msg: "تمت العمليه بنجاح",
+                          // toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 3,
+                          backgroundColor: Colors.black,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
                       // _controller.clear();
                     },
                   ),
@@ -465,6 +572,40 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         });
   }
+
   /************* nd modal for edit element *******************/
+  /************* st Widget for element sitting modal  *******************/
+  Widget sittingIcon({String? title, IconData? itemIcon, Function? myFunc}) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            title!,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(fontSize: 20.0),
+          ),
+          trailing: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: mainColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              itemIcon!,
+              color: Colors.white,
+              size: 20.0,
+            ),
+          ),
+          onTap: () => myFunc!(),
+        ),
+        Container(
+          width: double.infinity,
+          height: 1,
+          color: Colors.black12,
+        ),
+      ],
+    );
+  }
+/************* st Widget for element sitting modal  *******************/
 
 }

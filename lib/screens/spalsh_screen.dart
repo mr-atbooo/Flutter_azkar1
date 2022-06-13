@@ -1,3 +1,4 @@
+import 'package:azkar1/screens/category_screen.dart';
 import 'package:azkar1/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -17,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 3),
           () => Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (BuildContext context) => const HomeScreen(),
+          builder: (BuildContext context) => const CategoryScreen(),
         ),
       ),
     );

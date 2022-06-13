@@ -1,7 +1,7 @@
 class CategoryDetailModel {
   int? id;
   int? categoryId;
-  String? count;
+  int? count;
   String? description;
   String? reference;
   String? content;
